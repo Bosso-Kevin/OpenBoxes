@@ -10,7 +10,7 @@ RUN apk add --no-cache curl \
     "https://github.com/openboxes/openboxes/releases/download/${OPENBOXES_VERSION}/openboxes.war"
 
 
-FROM tomcat:7.0.109-jdk8-openjdk
+FROM tomcat:8.5-jdk8-openjdk
 
 LABEL maintainer="Kevin Hill"
 LABEL description="OpenBoxes Supply Chain Management System"
