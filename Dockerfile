@@ -19,7 +19,7 @@ LABEL description="OpenBoxes Supply Chain Management System"
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy the WAR file
-COPY --from=downloader /openboxes.war /usr/local/tomcat/webapps/openboxes.war
+COPY --from=downloader /openboxes.war /usr/local/tomcat/webapps/ROOT.war
 
 # Create config directory for OpenBoxes
 RUN mkdir -p /root/.grails
@@ -32,7 +32,7 @@ ENV CATALINA_OPTS="-server -Xms512m -Xmx2048m -XX:+UseG1GC -Djava.security.egd=f
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:8080/openboxes/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 EXPOSE 8080
 
