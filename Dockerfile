@@ -18,7 +18,10 @@ LABEL description="OpenBoxes Supply Chain Management System"
 # Remove default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy the WAR file
+# Cache buster - change this value to force rebuild
+ARG CACHE_BUST=2
+
+# Copy the WAR file as ROOT.war for root path deployment
 COPY --from=downloader /openboxes.war /usr/local/tomcat/webapps/ROOT.war
 
 # Create config directory for OpenBoxes
