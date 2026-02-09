@@ -21,8 +21,8 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 # Cache buster - change this value to force rebuild
 ARG CACHE_BUST=2
 
-# Copy the WAR file as ROOT.war for root path deployment
-COPY --from=downloader /openboxes.war /usr/local/tomcat/webapps/ROOT.war
+# Copy the WAR file as openboxes.war for /openboxes context path
+COPY --from=downloader /openboxes.war /usr/local/tomcat/webapps/openboxes.war
 
 # Create config directory for OpenBoxes
 RUN mkdir -p /root/.grails
@@ -35,7 +35,7 @@ ENV CATALINA_OPTS="-server -Xms512m -Xmx2048m -XX:+UseG1GC -Djava.security.egd=f
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8080/openboxes || exit 1
 
 EXPOSE 8080
 
