@@ -1,0 +1,62 @@
+services:
+  db:
+    image: mysql:5.7
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-openboxes_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-openboxes}
+      MYSQL_USER: ${MYSQL_USER:-openboxes}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-openboxes}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql.cnf:/etc/mysql/conf.d/openboxes.cnf:ro
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-openboxes_root}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  openboxes:
+    build:
+      context: .
+      args:
+        OPENBOXES_VERSION: ${OPENBOXES_VERSION:-v0.9.6-hotfix1}
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${MYSQL_DATABASE:-openboxes}
+      - DB_USER=${MYSQL_USER:-openboxes}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-openboxes}
+      # Application URL - CHANGE THIS FOR PRODUCTION
+      - OPENBOXES_URL=${OPENBOXES_URL:-http://localhost:8080}
+      # Mail settings (disabled by default)
+      - MAIL_ENABLED=${MAIL_ENABLED:-false}
+      - MAIL_HOST=${MAIL_HOST:-}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+    volumes:
+      - ./openboxes-config.properties:/root/.grails/openboxes-config.properties:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/openboxes" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+volumes:
+  mysql_data:
+    driver: local
