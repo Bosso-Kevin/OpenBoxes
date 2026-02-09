@@ -20,6 +20,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - openboxes-network
 
   openboxes:
     build:
@@ -50,13 +52,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    links:
+      - db
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 180s
+    networks:
+      - openboxes-network
 
 volumes:
   mysql_data:
     driver: local
+
+networks:
+  openboxes-network:
+    driver: bridge
